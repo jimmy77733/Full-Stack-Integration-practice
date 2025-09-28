@@ -1,0 +1,81 @@
+/* ---------------------------------------------------- */
+/* 核心修正：輸入與按鈕排版 */
+/* ---------------------------------------------------- */
+.input-row[b-ytbypbr1k9] {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 18px;
+    /* 確保所有項目在頂部對齊，避免 stretch 導致高度問題 */
+    align-items: flex-start; 
+}
+/* 調整 input 的 flex 比例，讓使用者輸入框佔據更多空間 */
+.input-row input.input-user[b-ytbypbr1k9], 
+.input-row input.input-message[b-ytbypbr1k9] {
+    height: 40px !important; 
+    flex-grow: 1; 
+    box-sizing: border-box;
+}
+
+/* ---------------------------------------------------- */
+/* 視覺增強：按鈕與互動回饋 (Hover, Active) */
+/* ---------------------------------------------------- */
+.send-btn[b-ytbypbr1k9] {
+    /* 調整漸變方向和陰影，增加立體感 */
+    background: linear-gradient(135deg, #7c3aed 0%, #6366f1 100%);
+    color: #fff;
+    border: none;
+    border-radius: 8px; /* 稍微圓潤一點 */
+    padding: 0 24px;
+    font-size: 1.05rem;
+    font-weight: 600; /* 更粗的字體 */
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1); /* 調整過渡效果 */
+    box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3); /* 更明顯的陰影 */
+    height: 40px !important;  /* 鎖定高度，與輸入框對齊 */
+    flex-shrink: 0; /* 防止被擠壓 */
+}
+
+/* 按鈕懸停效果：顏色變深，陰影上浮 */
+.send-btn:hover:not(:disabled)[b-ytbypbr1k9] {
+    background: linear-gradient(135deg, #6d28d9 0%, #5b5ee2 100%);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
+    transform: translateY(-1px); /* 輕微上浮 */
+}
+
+/* 按鈕點擊效果：按鈕被「按下去」 */
+.send-btn:active:not(:disabled)[b-ytbypbr1k9] {
+    transform: translateY(1px);
+    box-shadow: 0 2px 10px rgba(124, 58, 237, 0.2);
+}
+
+/* 禁用按鈕的樣式增強 */
+.send-btn:disabled[b-ytbypbr1k9] {
+    background: #e5e7eb;
+    color: #a1a1aa;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+}
+
+/* ---------------------------------------------------- */
+/* 訊息容器優化 */
+/* ---------------------------------------------------- */
+.messages-container[b-ytbypbr1k9] {
+    min-height: 200px; /* 稍微增加高度 */
+    max-height: 400px;
+    /* 移除背景色，讓它與卡片顏色稍微區分 */
+    background: #f7f7f9 !important; 
+    border: 1px solid #e5e7eb !important; 
+    border-radius: 10px !important;
+    padding: 16px;
+}
+
+/* 單條訊息項優化 */
+.messages-container .message-item[b-ytbypbr1k9] {
+    /* 增加權重確保樣式覆蓋 */
+    background: #7c3aed1a; 
+    color: #5b21b6; 
+    padding: 8px 16px;
+    border-radius: 18px; 
+    margin-bottom: 10px;
+}

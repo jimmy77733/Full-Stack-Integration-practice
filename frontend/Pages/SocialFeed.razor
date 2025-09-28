@@ -1,0 +1,141 @@
+@page "/feed"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject HttpClient Http
+@inject IJSRuntime JS // 用於 LocalStorage
+
+<div class="social-feed-container">
+    <div class="post-input-area card-style"> <input @bind="userName" placeholder="您的名字" class="form-input user-input" />
+        <textarea @bind="newPostContent" class="form-input" placeholder="分享新鮮事..."></textarea>
+        <button class="action-btn post-btn" @onclick="SubmitPost" disabled="@isPosting">@(isPosting ? "發布中..." : "發布")</button>
+    </div>
+
+    @* 【優化點 6: 延遲加載】: 僅顯示部分貼文 *@
+    <div class="feed-list">
+        @if (posts == null) { <p>載入中...</p> }
+        @if (posts != null)
+        {
+            @foreach (var post in posts)
+            {
+                <div class="post-card">
+                    <p class="post-content">@post.Content</p>
+                    <div class="post-footer">
+                        <span>@post.UserName - @post.PostDate.ToShortTimeString()</span>
+                        <span class="likes-count" @onclick="() => SendLike(post.Id)">
+                            ❤️ @post.Likes
+                        </span>
+                    </div>
+                </div>
+            }
+        }
+    </div>
+    
+    <button @onclick="LoadMorePosts" class="load-more-btn" disabled="@(isLoading || allLoaded)">
+        @(isLoading ? "載入更多..." : "載入更多貼文")
+    </button>
+</div>
+
+@code {
+    // 狀態管理變數
+    private List<Post>? posts;
+    private string newPostContent = string.Empty; // 臨時資料（未發送貼文）
+    private bool isPosting = false;
+    private bool isLoading = false;
+    private bool allLoaded = false;
+    private int page = 1;
+    private const int PageSize = 2; // 延遲加載每次載入 2 筆
+    
+    // SignalR 相關
+    private HubConnection? hubConnection;
+    private const string HubUrl = "http://localhost:5182/feedHub";
+    private const string AuthKey = "userAuthToken"; // LocalStorage Key
+    
+    // ----------------------------------------------------
+    // 【優化點 1: 會話儲存】: 實現無縫驗證
+    // ----------------------------------------------------
+    protected override async Task OnInitializedAsync()
+    {
+        // 1. 檢查 LocalStorage 是否有 Token (模擬身份驗證)
+        // 實際應用會用 Blazored.LocalStorage 獲取 JWT Token
+        string? storedToken = await JS.InvokeAsync<string>("localStorage.getItem", AuthKey);
+
+        if (string.IsNullOrEmpty(storedToken))
+        {
+             // 假設沒有 Token，我們設定一個，以繼續示範
+             await JS.InvokeVoidAsync("localStorage.setItem", AuthKey, "MockToken123");
+        }
+        
+        // 2. 建立 SignalR 連線
+        hubConnection = new HubConnectionBuilder().WithUrl(HubUrl).Build();
+        
+        // 【優化點 4: 即時通知】: 訂閱按讚更新
+        hubConnection.On<int, int>("ReceiveLikeUpdate", (postId, newLikes) =>
+        {
+            // 在本地列表中找到對應的貼文 ID 並更新 Likes 數字
+            var postToUpdate = posts?.FirstOrDefault(p => p.Id == postId);
+            if (postToUpdate != null)
+            {
+                postToUpdate.Likes = newLikes;
+                InvokeAsync(StateHasChanged);
+            }
+        });
+        
+        await hubConnection.StartAsync();
+        await LoadMorePosts(); // 載入初始數據
+    }
+    
+    // ----------------------------------------------------
+    // 【優化點 6: 延遲加載】: 每次只載入一頁數據
+    // ----------------------------------------------------
+    private async Task LoadMorePosts()
+    {
+        if (allLoaded || isLoading) return;
+        isLoading = true;
+        await Task.Yield(); // 解警告
+        var newPosts = GenerateMockPosts(PageSize); 
+        if (posts == null)
+        {
+            posts = newPosts;
+        }
+        else
+        {
+            posts.AddRange(newPosts);
+        }
+        if (newPosts.Count < PageSize) allLoaded = true;
+        isLoading = false;
+        page++;
+    }
+    
+    private string userName = "";
+    private async Task SubmitPost()
+    {
+        isPosting = true;
+        await Task.Yield(); // 解警告
+        posts?.Insert(0, new Post { Id = posts.Count + 1, Content = newPostContent, UserName = userName, Likes = 0, PostDate = DateTime.Now });
+        newPostContent = string.Empty;
+        isPosting = false;
+        // 模擬 SignalR 廣播給其他用戶
+        await InvokeAsync(StateHasChanged); 
+    }
+    
+    private async Task SendLike(int postId)
+    {
+        // 【優化點 4: SignalR 推送】: 將按讚動作透過 SignalR 傳遞給伺服器
+        if (hubConnection?.State == HubConnectionState.Connected)
+        {
+            await hubConnection.SendAsync("SendLikeUpdate", postId);
+        }
+    }
+    
+    private List<Post> GenerateMockPosts(int count)
+    {
+        // 這裡應該是實際的 Http 呼叫
+        // return await Http.GetFromJsonAsync<List<Post>>($"api/posts?page={page}&pageSize={count}");
+        
+        var mock = new List<Post>();
+        for (int i = 0; i < count; i++)
+        {
+            mock.Add(new Post { Id = (page-1) * PageSize + i + 1, Content = $"這是第 {i + 1} 筆貼文（第 {page} 頁）", UserName = "虛擬用戶", PostDate = DateTime.Now.AddMinutes(-i) });
+        }
+        return mock;
+    }
+}

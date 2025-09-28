@@ -1,0 +1,41 @@
+@inject HttpClient Http
+@page "/Weatherforecast"
+
+<h3>天氣預報</h3>
+@if (forecast == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="forecast-table">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Temp. (C)</th>
+                <th>Temp. (F)</th>
+                <th>Summary</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in forecast)
+        {
+            <tr>
+                <td>@item.Date.ToShortDateString()</td>
+                <td>@item.TemperatureC</td>
+                <td>@item.TemperatureF</td>
+                <td>@item.Summary</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+}
+
+@code {
+    private WeatherForecast[]? forecast; 
+
+    protected override async Task OnInitializedAsync()
+    {
+        forecast = await Http.GetFromJsonAsync<WeatherForecast[]>("http://localhost:5182/weatherforecast");
+    }
+}

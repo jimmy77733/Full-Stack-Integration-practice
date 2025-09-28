@@ -1,0 +1,126 @@
+@page "/broadcast"
+@using Microsoft.AspNetCore.SignalR.Client
+@inject NavigationManager Navigation // 用來獲取 Hub 的完整 URL
+
+
+<div class="broadcast-container">
+    <h3 class="broadcast-title">即時訊息廣播 <span class="status-dot @(IsConnected ? "online" : "offline")"></span></h3>
+    
+    <div class="input-row">
+        <input @bind="userName" placeholder="您的名字" class="input-user" />
+        <input @bind="message" placeholder="輸入訊息" class="input-message" @onkeydown="OnEnterPress" />
+        
+        <button @onclick="SendMessage" disabled="@(!IsConnected || isSending)" class="send-btn">
+            @(isSending ? "發送中..." : "發送")
+        </button>
+    </div>
+    
+    <div class="messages-container">
+        @foreach (var msg in receivedMessages)
+        {
+            <div class="message-item">@msg</div>
+        }
+    </div>
+    @if (!IsConnected)
+    {
+        <div class="error-msg">尚未連線到伺服器，請稍候...</div>
+    }
+</div>
+
+@code {
+    [Inject] private IJSRuntime JS { get; set; } = default!;
+    private IJSObjectReference? module;
+    #pragma warning disable CS0414
+    private bool jsLoaded = false;
+    #pragma warning restore CS0414
+    private HubConnection? hubConnection;
+    private List<string> receivedMessages = new();
+    private bool isSending = false;
+    private string userName = "User ";
+    private string message = string.Empty;
+
+    private bool IsConnected => hubConnection?.State == HubConnectionState.Connected;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && module == null) // 檢查是否是第一次渲染且模組未載入
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "/js/broadcastClient.js");
+        }
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl("http://localhost:5182/broadcastHub")
+            .Build();
+
+        hubConnection.On<string, string>("ReceiveMessage", (user, msg) =>
+        {
+            var formattedMsg = $"[{user}]: {msg}";
+            receivedMessages.Add(formattedMsg);
+            InvokeAsync(async () => {
+                await Task.Delay(10); // 觸發動畫
+                StateHasChanged();
+                await ScrollToBottom();
+            });
+        });
+
+        await hubConnection.StartAsync();
+    }
+    
+    // ----------------------------------------------------------------------
+    // B. 發送訊息 (用戶互動)
+    // ----------------------------------------------------------------------
+    private async Task SendMessage()
+    {
+        if (hubConnection is not null && !string.IsNullOrWhiteSpace(message))
+        {
+            isSending = true;
+            StateHasChanged();
+            try
+            {
+                await hubConnection.SendAsync("SendMessage", userName, message);
+                message = string.Empty;
+            }
+            finally
+            {
+                isSending = false;
+                StateHasChanged();
+                await ScrollToBottom();
+            }
+        }
+    }
+
+    private async Task OnEnterPress(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SendMessage();
+        }
+    }
+
+    // 自動滾動到最新訊息
+    private async Task ScrollToBottom()
+    {
+        if (module != null)
+        {
+            await module.InvokeVoidAsync("scrollMessagesToBottom"); 
+        }
+    }
+
+    // ----------------------------------------------------------------------
+    // C. 資源釋放
+    // ----------------------------------------------------------------------
+    public async ValueTask DisposeAsync()
+    {
+        if (hubConnection is not null)
+        {
+            await hubConnection.DisposeAsync();
+        }
+        if (module != null)
+        {
+            await module.DisposeAsync();
+        }
+    }
+}

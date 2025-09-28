@@ -1,0 +1,137 @@
+/* ---------------------------------------------------- */
+/* A. 整體布局和卡片樣式 */
+/* ---------------------------------------------------- */
+:host[b-9x0366ywf2] {
+    /* 讓內容在頁面中央對齊，並確保背景乾淨 */
+    display: block;
+    padding: 20px;
+    background-color: #f0f2f5; /* 輕微的灰色背景，模仿社交媒體 */
+}
+
+.social-feed-container[b-9x0366ywf2] {
+    max-width: 680px; /* 寬度限制 */
+    margin: 0 auto;
+}
+
+.card-style[b-9x0366ywf2] {
+    /* 統一卡片樣式 */
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+    padding: 15px;
+    margin-bottom: 15px;
+    transition: all 0.3s;
+}
+
+/* ---------------------------------------------------- */
+/* B. 輸入區樣式 (發布新狀態) */
+/* ---------------------------------------------------- */
+.post-input-area[b-9x0366ywf2] {
+    /* 繼承 card-style */
+}
+
+.post-input-area h3[b-9x0366ywf2] {
+    font-size: 1.25rem;
+    color: #050505;
+    margin-bottom: 10px;
+}
+
+.form-input[b-9x0366ywf2] {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+    box-sizing: border-box;
+    transition: border-color 0.2s;
+}
+
+.form-input:focus[b-9x0366ywf2] {
+    border-color: #1877f2; /* 聚焦時的藍色 */
+    box-shadow: 0 0 0 1px #1877f2;
+    outline: none;
+}
+
+/* 統一按鈕樣式 */
+.action-btn[b-9x0366ywf2] {
+    background-color: #1877f2;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    padding: 8px 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.post-btn[b-9x0366ywf2] {
+    width: 100%; /* 發布按鈕佔滿寬度 */
+    margin-top: 10px;
+}
+
+.post-btn:disabled[b-9x0366ywf2] {
+    background-color: #a8c3e8;
+    cursor: not-allowed;
+}
+
+/* ---------------------------------------------------- */
+/* C. 貼文列表與單個貼文卡片 */
+/* ---------------------------------------------------- */
+.feed-list[b-9x0366ywf2] {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.post-card[b-9x0366ywf2] {
+    /* 繼承 card-style */
+    padding: 15px 20px;
+}
+
+.post-content[b-9x0366ywf2] {
+    font-size: 1rem;
+    line-height: 1.5;
+    margin-bottom: 10px;
+    white-space: pre-wrap; /* 保留換行 */
+}
+
+.post-footer[b-9x0366ywf2] {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    color: #606770;
+    padding-top: 8px;
+    border-top: 1px solid #f0f2f5;
+}
+
+.likes-count[b-9x0366ywf2] {
+    color: #fa383e; /* 心形圖標顏色 */
+    font-weight: 600;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.likes-count:hover[b-9x0366ywf2] {
+    transform: scale(1.1); /* 懸停時輕微放大 */
+}
+
+/* ---------------------------------------------------- */
+/* D. 載入更多按鈕 */
+/* ---------------------------------------------------- */
+.load-more-btn[b-9x0366ywf2] {
+    background-color: #e4e6eb;
+    color: #050505;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 20px;
+    width: 100%;
+    margin-top: 15px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+}
+
+.load-more-btn:hover:not(:disabled)[b-9x0366ywf2] {
+    background-color: #d8dadf;
+}

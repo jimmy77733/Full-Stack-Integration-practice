@@ -1,0 +1,30 @@
+.forecast-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    border-radius: 8px;
+    overflow: hidden;
+    color: #e9ecef;
+}
+
+.forecast-table thead tr {
+    background-color: #343a40;
+    color: #ffffff;
+    text-align: left;
+    font-weight: bold;
+}
+
+.forecast-table th,
+.forecast-table td {
+    padding: 12px 15px;
+}
+
+.forecast-table tbody tr {
+    background-color: #495057;
+    border-bottom: 1px solid #343a40;
+}
+
+.forecast-table tbody tr:hover {
+    background-color: #5a6268;
+}

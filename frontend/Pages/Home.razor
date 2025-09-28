@@ -1,0 +1,40 @@
+﻿@page "/"
+
+<PageTitle>首頁</PageTitle>
+
+<div class="home-container">
+    <div class="hero-section">
+        <h1>歡迎來到 Jimmy 的練習網站</h1>
+        <p class="lead"> Blazor WebAssembly 打造的全端開發實踐專案。</p>
+    </div>
+
+    <div class="feature-grid">
+        <div class="feature-card">
+            <span class="icon">📱</span>
+            <h3>社交動態牆</h3>
+            <p>一個具備即時按讚、無限滾動加載功能的社交動態頁面。</p>
+            <NavLink href="feed" class="btn-explore">前往探索</NavLink>
+        </div>
+
+        <div class="feature-card">
+            <span class="icon">💾</span>
+            <h3>本機儲存</h3>
+            <p>示範如何使用 Local Storage 和 Session Storage 來保存主題偏好和購物車狀態。</p>
+            <NavLink href="storage-demo" class="btn-explore">前往探索</NavLink>
+        </div>
+
+        <div class="feature-card">
+            <span class="icon">📡</span>
+            <h3>即時廣播</h3>
+            <p>利用 SignalR 實現一個簡單的即時聊天廣播應用。</p>
+            <NavLink href="broadcast" class="btn-explore">前往探索</NavLink>
+        </div>
+        
+        <div class="feature-card">
+            <span class="icon">☁️</span>
+            <h3>天氣預報</h3>
+            <p>從後端 API 獲取天氣資料並以表格呈現。</p>
+            <NavLink href="weather" class="btn-explore">前往探索</NavLink>
+        </div>
+    </div>
+</div>

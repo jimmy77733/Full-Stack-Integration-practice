@@ -1,0 +1,111 @@
+@page "/storage-demo"
+
+@using Blazored.LocalStorage
+@using Blazored.SessionStorage
+@inject ILocalStorageService LocalStorage  // 長期記憶 (LocalStorage)
+@inject ISessionStorageService SessionStorage // 短期記憶 (SessionStorage)
+
+<div class="storage-container @(themePreference == "Dark" ? "dark-theme" : "")">
+    <h3>本機儲存與會話儲存示範</h3>
+
+    <div class="card">
+        <h4>長期記憶 (主題偏好)</h4>
+        <p>主題偏好: <strong>@themePreference</strong></p>
+        <div class="button-group">
+            <button class="btn-storage" @onclick="ToggleTheme">切換主題 (Light/Dark)</button>
+            <button class="btn-storage" @onclick="ResetTheme">重設主題為 'Light'</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>短期記憶 (購物車數量)</h4>
+        <p>當前購物車商品數: <strong>@cartCount</strong></p>
+        <div class="button-group">
+            <button class="btn-storage" @onclick="AddItem">增加商品 (+1)</button>
+            <button class="btn-storage" @onclick="ClearCart">清空購物車</button>
+            <button class="btn-storage" @onclick="SetCartToFive">購物車數量設為 5</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <h4>儲存內容檢視</h4>
+        <div class="button-group">
+            <button class="btn-storage" @onclick="ShowStorageContent">顯示儲存內容</button>
+        </div>
+        <pre>@storageContent</pre>
+    </div>
+</div>
+
+@code {
+    private string themePreference = "Loading...";
+    private int cartCount = 0;
+    private string storageContent = string.Empty;
+    
+    // 定義儲存的鍵名
+    private const string ThemeKey = "userTheme";
+    private const string CartKey = "tempCartCount";
+
+    // ----------------------------------------------------
+    // 1. 元件初始化時，讀取兩種記憶
+    // ----------------------------------------------------
+    protected override async Task OnInitializedAsync()
+    {
+        // A. 讀取長期記憶：從 LocalStorage 讀取主題偏好 (string)
+        // 如果找不到，使用預設值 "Light"
+        themePreference = await LocalStorage.GetItemAsStringAsync(ThemeKey) ?? "Light";
+        
+        // B. 讀取短期記憶：從 SessionStorage 讀取購物車數量 (int)
+        // GetItemAsync<T> 會自動處理反序列化 (JSON -> C#)
+        cartCount = await SessionStorage.GetItemAsync<int?>(CartKey) ?? 0;
+    }
+    
+
+    // ----------------------------------------------------
+    // 2. 主題切換與重設
+    // ----------------------------------------------------
+    private async Task ToggleTheme()
+    {
+        themePreference = themePreference == "Dark" ? "Light" : "Dark";
+        await LocalStorage.SetItemAsStringAsync(ThemeKey, themePreference);
+    }
+
+    private async Task ResetTheme()
+    {
+        themePreference = "Light";
+        await LocalStorage.SetItemAsStringAsync(ThemeKey, themePreference);
+    }
+
+    // ----------------------------------------------------
+    // 3. 寫入與更新短期記憶 (購物車)
+    // ----------------------------------------------------
+    private async Task AddItem()
+    {
+        cartCount++;
+        // 程式碼功能：將新的購物車數量儲存到 SessionStorage 中。
+        // (一旦用戶關閉瀏覽器視窗或分頁，資料就會被自動清除)
+        await SessionStorage.SetItemAsync(CartKey, cartCount);
+    }
+
+    private async Task SetCartToFive()
+    {
+        cartCount = 5;
+        await SessionStorage.SetItemAsync(CartKey, cartCount);
+    }
+
+    private async Task ClearCart()
+    {
+        cartCount = 0;
+        // 程式碼功能：移除購物車的短期記憶。
+        await SessionStorage.RemoveItemAsync(CartKey);
+    }
+
+    // ----------------------------------------------------
+    // 4. 顯示 localStorage 與 sessionStorage 內容
+    // ----------------------------------------------------
+    private async Task ShowStorageContent()
+    {
+        var theme = await LocalStorage.GetItemAsStringAsync(ThemeKey) ?? "(無)";
+        var cart = await SessionStorage.GetItemAsync<int?>(CartKey);
+        storageContent = $"LocalStorage: {ThemeKey} = {theme}\nSessionStorage: {CartKey} = {(cart.HasValue ? cart.Value.ToString() : "(無)")}";
+    }
+}
